@@ -1,0 +1,15 @@
+root nonleaf pppw + sjmn
+dbpl leaf 5
+cczh nonleaf sllz + lgvd
+zczc leaf 2
+ptdq nonleaf humn - dvpt
+dvpt leaf 3
+lfqf leaf 4
+humn leaf 5
+ljgn leaf 2
+sjmn nonleaf drzm * dbpl
+sllz leaf 4
+pppw nonleaf cczh / lfqf
+lgvd nonleaf ljgn * ptdq
+drzm nonleaf hmdt - zczc
+hmdt leaf 32
