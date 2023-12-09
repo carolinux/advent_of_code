@@ -56,8 +56,17 @@ def process(mi, ma):
         print(f"We are in map {i} out of {len(maps)}")
 
         if i>0:
-            # maybe sort and cleanse overlaps?
-            q = nq
+            # q = nq
+            nq.sort(key=lambda x: (x[0], -x[1]))
+            q = []
+            prevma = -1
+            for mi, ma in nq:
+                if ma <= prevma:
+                    continue
+                q.append((mi, ma))
+                prevma = ma
+
+            print(f"Queue size now : {len(q)}")
 
         nq = []
 
