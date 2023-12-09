@@ -37,16 +37,6 @@ def overlap(x1, y1, x2, y2):
         return None
     return max(x1, x2), min(y1, y2)
 
-def underlap(x1, y1, x2, y2):
-    # we know that they overlap
-    res = []
-    if x1 < x2:
-        res.append((x1, x2-1))
-    if y1 > y2:
-        res.append((y2+1, y1))
-    return res
-
-
 
 def process(mi, ma):
 
@@ -78,10 +68,6 @@ def process(mi, ma):
                 #print(f"mapped {lo} {hi} vs existing {mi, ma}")
                 if overlap(mi, ma, lo, hi):
                     matches = True
-                    #und = underlap(mi, ma, lo, hi)
-                    for rr in underlap(mi, ma, lo, hi):
-                        #print(f"Underlap: {rr}")
-                        q.append(rr)
                     mii, maa = overlap(mi, ma, lo, hi)
                     #print(f"{mi}, {ma} overlaps {lo}, {hi} (dst={dst}) with overlap = {mii, maa}, underlap={und}")
                     #ranges[i].discard((mi, ma))
