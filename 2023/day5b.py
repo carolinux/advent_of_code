@@ -46,17 +46,8 @@ def process(mi, ma):
         print(f"We are in map {i} out of {len(maps)}")
 
         if i>0:
-            # q = nq
-            nq.sort(key=lambda x: (x[0], -x[1]))
-            q = []
-            prevma = -1
-            for mi, ma in nq:
-                if ma <= prevma:
-                    continue
-                q.append((mi, ma))
-                prevma = ma
-
-            print(f"Queue size now : {len(q)}")
+            print(f"Queue size now : {len(nq)}")
+            q = nq
 
         nq = []
 
@@ -69,8 +60,7 @@ def process(mi, ma):
                 if overlap(mi, ma, lo, hi):
                     matches = True
                     mii, maa = overlap(mi, ma, lo, hi)
-                    #print(f"{mi}, {ma} overlaps {lo}, {hi} (dst={dst}) with overlap = {mii, maa}, underlap={und}")
-                    #ranges[i].discard((mi, ma))
+                    #print(f"{mi}, {ma} overlaps {lo}, {hi} (dst={dst}) with overlap = {mii, maa}")
                     mii = dst + abs(lo-mii)
                     maa = dst + abs(lo-maa)
                     nq.append((mii, maa))
