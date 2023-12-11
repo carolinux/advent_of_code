@@ -1,24 +1,21 @@
-
+"""Forced to use prefix sum, otherwise would run out of memory.
+Prefix sum ended up nicer and easier to write than actually expanding.
+"""
 mat = []
-mult = []
+
 empty_rows = set()
 empty_cols = set()
 
 with open("day11.txt", 'r') as f:
 
-
-    # read the universe, expanding rows as we read
     for i,line in enumerate(f.readlines()):
         mat.append(list(line.strip()))
         if set(mat[-1]) == {'.'}:
             empty_rows.add(i)
-        mult.append([1] * len(mat[-1]))
-
 
 rows = len(mat)
 cols = len(mat[0])
 
-to_expand = []
 for j in range(cols):
     empty = True
     for i in range(rows):
@@ -51,12 +48,7 @@ def get_ps(l, r, a):
     """Get the dist between l and r in O(1)"""
     if l == r:
         return 0
-    #if l == 0:
-    #    return a[r]
     return a[r] - a[l]
-
-
-
 
 
 print(f"Rows: {rows}, cols={cols}")
@@ -68,8 +60,6 @@ for i in range(rows):
         if mat[i][j] == '#':
             galaxies.append((i, j))
 
-
-
 s = 0
 n = len(galaxies)
 
@@ -80,12 +70,4 @@ for i, (gi, gj) in enumerate(galaxies):
         dist = abs(get_ps(xi, gi, psumr)) + abs(get_ps(xj, gj, psumc))
         s+=dist
 
-
-
-
 print(s)
-
-
-
-
-
