@@ -1,9 +1,11 @@
 import functools as ft
 
-
+ops = 0
 @ft.lru_cache(maxsize=None)
 def ways(gi, cursor, ch, id):
 
+    global ops
+    ops +=1
     if gi == len(groups) and ch =='#' and cursor != len(pattern):
         return 0
 
@@ -20,6 +22,7 @@ def ways(gi, cursor, ch, id):
         left = len(pattern) - cursor
 
         for lng in range(1, left+1):
+            ops+=1
             if pattern[cursor + lng - 1] == '#':
                 break
             ans += ways(gi, cursor + lng, '#', id)
@@ -27,6 +30,7 @@ def ways(gi, cursor, ch, id):
         valid = True
         lng = groups[gi]
         for j in range(cursor, cursor + lng):
+            ops+=1
             if j >= len(pattern) or pattern[j] == '.':
                 valid = False
                 break
@@ -43,7 +47,12 @@ with open("day12.txt", 'r') as f:
         pattern = pattern + '?' + pattern + '?' + pattern + '?' + pattern + '?' + pattern
         groups = list(map(int, groups.split(',')))
         groups = 5 * groups
+        ops = 0
         w = ways(0, 0, '.', i)
+        #if ops > len(pattern) * len(pattern):
+        #    print(f"Operations = {ops} for n = {len(pattern)} w ={w}")
+        #else:
+        #    print("nah")
         s+=w
 
 print(s)
