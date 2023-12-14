@@ -69,7 +69,7 @@ def rotat(dir):
 
     if dir in ("N", "S"):
         for (ocol, orow), (ncol, nrow) in newm.items():
-            incr = rows - nrow  # this works because square matrix
+            incr = rows - nrow
 
             mat2[ocol][orow], mat2[ncol][nrow] = mat2[ncol][nrow], mat2[ocol][orow]
             mat1[orow][ocol], mat1[nrow][ncol] = mat1[nrow][ncol], mat1[orow][ocol]
