@@ -103,8 +103,6 @@ dists[start_state_left] = 0
 
 # I wonder, can we re-visit a (r,c) cell as part of the optimal path?
 
-from collections import Counter
-
 while q:
     dist, state = hq.heappop(q)
 
@@ -112,15 +110,6 @@ while q:
     if state in dists and dists[state] < dist:
         continue
     if state.r == rows -1 and state.c == cols -1 and state.consec >= MIN_CONSEC:
-        #print(f"{len(path)} vs {len(set(path))}")
-        # find duplicate in list
-        #c = Counter(path)
-        #print(f"Duplicate: {c.most_common(1)}")
-        #ans = 0
-        #for st in path:
-        #    ans+=mat[st[0]][st[1]]
-        #print(f"Ans: {ans}")
-
         print(f"Min dist: {dist}")
         break
     for cand_state in get_neighs(state, rows, cols):
