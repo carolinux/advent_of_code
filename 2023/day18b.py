@@ -38,6 +38,8 @@ class Seg:
 segs = []
 ddirs = []
 num_border = 0
+
+hrows = set()
 with open(fn, 'r') as f:
 
     for i,line in enumerate(f.readlines()):
@@ -81,11 +83,13 @@ with open(fn, 'r') as f:
         assert segs[-1].y1 <= segs[-1].y2
         num_border+=num
 
-        seg = segs[-1]
+        hrows.add(x-1)
+        hrows.add(x)
+        hrows.add(x+1)
+        hrows.add(cx)
+        hrows.add(cx+1)
+        hrows.add(cx-1)
 
-        if i > 0:
-
-            assert (seg.x2-seg.x1 == num -1 or seg.y2-seg.y1 == num -1)
 
 
 print(minx, maxx)
@@ -172,9 +176,16 @@ def get_crossings(r):
 
 
 s = 0
+incr = 0
 for i, r in enumerate(range(minx, maxx+1)):
+
+    if r not in hrows:
+        s+=prev
+        continue
+
     crossings = get_crossings(r)
     last_occ = None
+
     walls = 0
     incr = 0
     for cr in crossings:
@@ -188,9 +199,11 @@ for i, r in enumerate(range(minx, maxx+1)):
             s+= num_occ
             incr+=num_occ
 
+
         walls+= cr.value()
     #print(f"Line {r} has {incr} occupied cells")
     #print(f"and crossings = {crossings}")
+    prev = incr
     print(f"After line {i} = {s} lava cells")
 print(s+num_border)
 #print(num_border)
@@ -198,5 +211,6 @@ print(s+num_border)
 
 #952408144115 correct answer for sample
 #62762509300678 correct answer for my input
+
 # Unoptimized scanline took 19 minutes
 # can probably make it faster by not looking at all the segments each time
