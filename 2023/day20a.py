@@ -146,8 +146,8 @@ for it in range(1000):
 
         q.extendleft(emit)
 
-    #print(f"{it+1} finished with emissions: {res[0]-prevres[0]}, {res[1]-prevres[1]}")
-    #print(nodes['bz'].mem)
+    #print(f"{it+1} finished with emissions: {res[0]-prevres[0] + res[1]-prevres[1]}")
+    #print(nodes['xk'].state)
     #input()
     #prevres = copy.copy(res)
 
