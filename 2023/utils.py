@@ -26,3 +26,7 @@ def read_str_mat(fn):
             mat.append(row)
 
     return mat
+
+def print_mat(mat):
+    for row in mat:
+        print("".join(row))

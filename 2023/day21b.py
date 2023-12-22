@@ -6,8 +6,12 @@ import heapq as hq
 import sys
 import functools as ft
 
+import matplotlib
+
+matplotlib.use('GTK3Agg')
 
 import matplotlib.pyplot as plt
+
 def plot(mat):
     return
     mat3 = copy.deepcopy(mat)
@@ -20,36 +24,41 @@ def plot(mat):
     matrix = mat3
     rows, cols = len(matrix), len(matrix[0])
 
-    fig, ax = plt.subplots()
+    fig, ax = plt.subplots(figsize=(100,100))
 
     cax = ax.matshow(matrix, cmap='viridis')
 
     for i in range(rows):
         for j in range(cols):
+            print(i, j)
             ax.text(j, i, str(matrix[i][j]), ha='center', va='center', fontsize=12, color='black')
 
     for i in range(rows + 1):
-        if i%7 == 0:
+        print(i)
+        if i%FULL == 0:
             color = 'white'
         else:
             color = 'black'
         ax.axhline(i - 0.5, color=color, linewidth=2)
 
     for j in range(cols + 1):
-        if j%7 == 0:
+        print(j)
+        if j%FULL == 0:
             color = 'white'
         else:
             color = 'black'
         ax.axvline(j - 0.5, color=color, linewidth=2)
 
+    print("colorbar")
     plt.colorbar(cax)
-    plt.show()
+    #plt.show()
+    print("save")
     plt.savefig('matrix.png')
 
 
 #fn = 'day21.txt'
 #fn = 'small2.txt'
-small = True
+small = False
 if small:
     fn = 'small2.txt'
     HALF = 3
@@ -58,7 +67,8 @@ else:
     HALF = 65
     FULL = 131
     fn = 'day21.txt'
-NN = 24
+NN = 2
+NN = 202300
 badvals = '#'
 mat = read_str_mat(fn)
 
@@ -100,8 +110,8 @@ def find_reachable(starts, iter, parity, mat, verbose=False):
 
     if verbose:
 
-        print_mat(new_mat)
-        print(cnt)
+        #print_mat(new_mat)
+        #print(cnt)
         plot(new_mat)
     cnt2 = 0
     for i in range(len(new_mat)):
@@ -110,6 +120,8 @@ def find_reachable(starts, iter, parity, mat, verbose=False):
                 cnt2+=1
     #print(cnt2)
     #assert cnt==cnt2
+    if verbose:
+        return cnt, new_mat
     return cnt
 
 rows = len(mat)
@@ -162,10 +174,10 @@ sss = find_reachable([ss], FULL, 1-p, mat)
 ee = find_reachable([es], FULL, 1-p, mat)
 ww = find_reachable([ws], FULL, 1-p, mat)
 
-wn = find_reachable([ws,ns], FULL, p, mat)
-sw = find_reachable([ws,ss], FULL, p, mat)
-ess = find_reachable([es,ss], FULL, p, mat)
-ne = find_reachable([es,ns], FULL, p, mat)
+wn = find_reachable([ws,ns], FULL, 1-p, mat)
+sw = find_reachable([ws,ss], FULL, 1-p, mat)
+ess = find_reachable([es,ss], FULL, 1-p, mat)
+ne = find_reachable([es,ns], FULL, 1-p, mat)
 
 ec = (0, 0)
 wc = (0, cols-1)
@@ -200,9 +212,13 @@ res2+=nn
 
 
 
+# 609012263058042 is the right answer
 
 print(res1 + res2)
+sys.exit(0)
 
+# Code below does bruteforcing for a small number of expansions
+# It helped me work out/visualize the parities and the partial boards
 
 def stitch(mat, n):
     rowz2 = []
@@ -211,12 +227,12 @@ def stitch(mat, n):
             row1 = copy.copy(row)
             row1[row.index('S')] = '.'
             row2 = n * row1 + row + n* row1
-            print(row2)
+            #print(row2)
         else:
             row2 = (2*n+1) * row
         rowz2.append(row2)
 
-    print(f"I have {len(rowz2)}")
+    #print(f"I have {len(rowz2)}")
     mat2 = []
     for i in range(2 * n + 1):
         for r in rowz2:
@@ -242,8 +258,25 @@ mat2, start2 = stitch(mat, n)
 #print_mat(mat2)
 #print("----------")
 
-res_comp = find_reachable([start2], LIMIT, 1, mat2, verbose=True)
+res_comp, mat3 = find_reachable([start2], LIMIT, 1, mat2, verbose=True)
 print(f" brute force {res_comp} vs {res1+res2}")
+
+
+def get_cnt(mat2, i, j):
+    cnt = 0
+    #print(i)
+    #print(j)
+    for r in range(i, i+FULL):
+        for c in range(j,j+FULL):
+            if mat2[r][c] == 'x':
+                cnt+=1
+    return cnt
+
+print("real segments")
+for i in range(0, len(mat3), FULL):
+    for j in range(0, len(mat3[0]), FULL):
+            cnt = get_cnt(mat3, i, j)
+            print(f"i={i}, j={j}, cnt={cnt}")
 
 
 
