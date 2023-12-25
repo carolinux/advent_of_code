@@ -94,3 +94,5 @@ for i in range(len(edges)):
             if len(sizes) == 2:
                 print(sizes[0]*sizes[1])
                 sys.exit(0)
+
+# Ans: 533628, ran in 16 minutes

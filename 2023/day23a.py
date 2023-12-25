@@ -3,7 +3,7 @@ from collections import deque, defaultdict
 
 
 fn = 'day23.txt'
-#fn = 'small.txt'
+#fn = 'small2.txt'
 
 badvals = '#'
 mat = read_str_mat(fn)
@@ -44,8 +44,7 @@ for i in range(rows):
 
         g[(i,j)] = neighs
 
-
-
+# the check is imperfect since we also can't go up from . to  a v for example
 #assert not has_cycles(None, start, g, set())
 
 import heapq as hq

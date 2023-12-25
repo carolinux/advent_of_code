@@ -1,10 +1,12 @@
 
-def get_neighbours(pt, mat, visited=None, badvals=None):
+def get_neighbours(pt, mat, visited=None, badvals=None, dirs = None):
+    if dirs is None:
+        dirs = ((0,1),(0,-1),(1,0),(-1,0))
     rows = len(mat)
     cols = len(mat[0])
     x,y = pt
     ans = []
-    for dx, dy in ((0,1),(0,-1),(1,0),(-1,0)):
+    for dx, dy in dirs:
         cx = x + dx
         cy = y + dy
         if cx<0 or cy<0 or cx>=rows or cy>=cols:
@@ -30,3 +32,13 @@ def read_str_mat(fn):
 def print_mat(mat):
     for row in mat:
         print("".join(row))
+
+
+def get_ints_from_str(s, sep=','):
+    frags = s.split(sep)
+    res = []
+    for frag in frags:
+        frag = frag.strip()
+        res.append(int(frag))
+    return res
+
