@@ -16,7 +16,7 @@ int E = 1176;
 int Q = 223;
 
 
-void topo(int cur, vector<set<int>> &g, vector<int> &order, vector<bool> &visited) {
+void topo(int cur, vector<set<int>> &g, vector<int> &order) {
     vector<int> indeg = vector<int>(100, 0);
     for (int i = 0; i < 100; i++) {
         for (int j : g[i]) {
@@ -31,8 +31,7 @@ void topo(int cur, vector<set<int>> &g, vector<int> &order, vector<bool> &visite
         order.push_back(cur);
         for (int next : g[cur]) {
             indeg[next]--;
-            if (indeg[next] == 0 && !visited[next]) {
-                visited[next] = true;
+            if (indeg[next] == 0) {
                 q.push(next);
             }
         }
@@ -135,8 +134,7 @@ signed main() {
 
         for (int i=0;i<tokens.size();i++) {
             vector<int> order;
-            vector<bool> visited = vector<bool>(100, false);
-            topo(tokens[i], gg, order, visited);
+            topo(tokens[i], gg, order);
             if (order.size() == tokens.size()) {
 
                 ans+=order[order.size()>>1];
