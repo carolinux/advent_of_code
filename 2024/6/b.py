@@ -53,12 +53,12 @@ def wander(curr, dir, vis):
 ans = 0
 for i in range(len(mat)):
     for j in range(len(mat[0])):
-        print(f"at {i},{j}")
+        #print(f"at {i},{j}")
         val = mat[i][j]
         if val != '.':
             continue
         mat[i][j] = "#"
-        visited=set()
+        visited = set()
         stuck = wander(start, dirs[0], visited)
         mat[i][j] = "."
         if stuck:
@@ -66,3 +66,5 @@ for i in range(len(mat)):
 
 print(ans)
 
+# Note: running with pypy3: 25 sec
+# running with plain python3: 42 sec
