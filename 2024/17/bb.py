@@ -37,7 +37,7 @@ def combine(bs):
 
 res = []
 @ft.lru_cache(maxsize=None)
-def process(b1,b2,b3,b4, i, j):
+def process(b1,b2,b3,b4, i):
     if i == len(ops):
         return 0
     b = b4^6
@@ -46,13 +46,11 @@ def process(b1,b2,b3,b4, i, j):
 
     if cand != ops[i]:
         return -1
-    if False:
-        pass
-    else:
-        for b0 in range(8):
-            prev = process(b0, b1, b2, b3, i+1, j+1)
-            if prev !=-1:
-                return (prev<<3) | b0
+
+    for b0 in range(8):
+        prev = process(b0, b1, b2, b3, i+1)
+        if prev !=-1:
+            return (prev<<3) | b0
 
     return -1
 
@@ -63,7 +61,7 @@ for i in range(8):
     for j in range(8):
         for k in range(8):
             for l in range(8):
-                cand = process(i, j, k, l, 0, 4)
+                cand = process(i, j, k, l, 0)
                 if cand !=-1:
                     cand = (cand<<3) | i
                     cand = (cand<<3) | j
