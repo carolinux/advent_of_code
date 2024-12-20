@@ -87,7 +87,13 @@ def dfs(curr, mat, termini):
 def bfs2(st, mat, termini):
     visited = set()
     q = coll.deque()
-    q.append((0,st))
+
+    for di, dj in [(0, 1), (0, -1), (1, 0), (-1, 0)]:
+        ni, nj = st[0] + di, st[1] + dj
+        if 0 <= ni < len(mat) and 0 <= nj < len(mat) and (ni, nj) not in termini:
+            visited.add((ni, nj))
+            q.append((1, (ni, nj)))
+    #q.append((0,st))
     visited.add(st)
     res = {}
 
@@ -95,9 +101,9 @@ def bfs2(st, mat, termini):
         dist, curr = q.popleft()
         if dist>20:
             continue
-        if curr in termini and dist == 1:
-            continue
-        if curr in termini and dist>1:
+        assert not ( curr in termini and dist == 1)
+        if curr in termini:
+            assert dist>1
             res[curr] = min(res.get(curr, math.inf), dist)
             continue
         for di, dj in [(0, 1), (0, -1), (1, 0), (-1, 0)]:
@@ -116,7 +122,7 @@ cnt = coll.defaultdict(set)
 for pt1 in path:
     #print(pt1)
 
-    visited = dfs(pt1, mat, path)
+    visited = bfs2(pt1, mat, path)
     for pt2, dist in visited:
         total = dists[pt1] + dist + (dists[end] - dists[pt2])
         if total < refdist:
