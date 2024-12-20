@@ -49,7 +49,12 @@ def bfs(curr, mat, dopath=False):
 
 
 def _dfs(curr, mat, termini, depth, res, vis):
-    if curr in termini:
+    #print(curr)
+    if depth>20:
+        return
+    if curr in termini and depth == 1:
+        return
+    if curr in termini and depth > 1:
         res.append((curr, depth))
         return
 
@@ -62,6 +67,18 @@ def _dfs(curr, mat, termini, depth, res, vis):
 
 
     vis.remove(curr)
+
+
+def dfs(curr, mat, termini):
+    res = []
+    _dfs(curr, mat, termini, 0, res, set())
+    #print(f" len res {len(res)} vs len set res {len(set(res))}")
+    # group by termini and get the smallest
+    m ={}
+    for pt, dist in res:
+        m[pt] = min(m.get(pt, math.inf), dist)
+
+    return  list(m.items())
 
 
 
@@ -78,6 +95,8 @@ def bfs2(st, mat, termini):
         dist, curr = q.popleft()
         if dist>20:
             continue
+        if curr in termini and dist == 1:
+            continue
         if curr in termini and dist>1:
             res[curr] = min(res.get(curr, math.inf), dist)
             continue
@@ -87,7 +106,7 @@ def bfs2(st, mat, termini):
                 visited.add((ni, nj))
                 q.append((dist+1, (ni, nj)))
 
-    return res
+    return list(res.items())
 
 refdist, path, dists = bfs(start, mat, dopath=True)
 path = set(path)
@@ -95,12 +114,15 @@ path = set(path)
 cnt = coll.defaultdict(set)
 
 for pt1 in path:
+    #print(pt1)
 
-    visited = bfs2(pt1, mat, path)
-    for pt2, dist in visited.items():
+    visited = dfs(pt1, mat, path)
+    for pt2, dist in visited:
         total = dists[pt1] + dist + (dists[end] - dists[pt2])
         if total < refdist:
             cnt[refdist-total].add(tuple([pt1, pt2]))
+        #else:
+        #    print(f"total {total} is greater than refdist {refdist}")
 
 
 ways = 0
@@ -110,6 +132,7 @@ for k in sorted(cnt.keys()):
     #print(cnt[k])
     if k >=50:
         print(f"we have {v} ways that save {k} steps")
+        #print(cnt[k])
     if k>=100:
         ways+= v
 
