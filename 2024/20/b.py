@@ -84,13 +84,13 @@ def dfs(curr, mat, termini):
 
 
 
-def bfs2(st, mat, termini):
+def bfs2(st, mat, pathpts):
     visited = set()
     q = coll.deque()
 
     for di, dj in [(0, 1), (0, -1), (1, 0), (-1, 0)]:
         ni, nj = st[0] + di, st[1] + dj
-        if 0 <= ni < len(mat) and 0 <= nj < len(mat) and (ni, nj) not in termini:
+        if 0 <= ni < len(mat) and 0 <= nj < len(mat[0]) and (ni, nj) not in pathpts:
             visited.add((ni, nj))
             q.append((1, (ni, nj)))
     #q.append((0,st))
@@ -101,14 +101,14 @@ def bfs2(st, mat, termini):
         dist, curr = q.popleft()
         if dist>20:
             continue
-        assert not ( curr in termini and dist == 1)
-        if curr in termini:
+        assert not (curr in pathpts and dist == 1)
+        if curr in pathpts:
             assert dist>1
             res[curr] = min(res.get(curr, math.inf), dist)
             continue
         for di, dj in [(0, 1), (0, -1), (1, 0), (-1, 0)]:
             ni, nj = curr[0] + di, curr[1] + dj
-            if 0 <= ni < len(mat) and 0 <= nj < len(mat) and (ni, nj) not in visited:
+            if 0 <= ni < len(mat) and 0 <= nj < len(mat[0]) and (ni, nj) not in visited:
                 visited.add((ni, nj))
                 q.append((dist+1, (ni, nj)))
 
@@ -142,6 +142,6 @@ for k in sorted(cnt.keys()):
     if k>=100:
         ways+= v
 
-print(ways)
+
 
 
