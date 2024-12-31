@@ -39,11 +39,14 @@ def diffy(nums):
     for i in range(1, len(nums)):
         diffs.append((nums[i]%10) - (nums[i-1]%10))
     #print(f"Diffs={diffs} for nums={nums}")
+    assert len(diffs) == 2000
     mseq = {}
     for i in range(3, len(diffs)):
         assert i-3 >= 0
         seq4 = (diffs[i-3], diffs[i-2], diffs[i-1], diffs[i])
-        mseq[seq4] = max(mseq.get(seq4, 0), nums[i+1]%10)
+        assert i+1 < len(nums)
+        if seq4 not in mseq:
+            mseq[seq4] = nums[i+1]%10
 
     return mseq
 
@@ -67,15 +70,19 @@ print(len(nums))
 #print(nums)
 
 for j, cand in enumerate(changes):
+    #if cand != (-2, 1, -1, 3):
+    #    continue
 
     #print(f"looking at sequence {cand} {j} out of {len(changes)}")
     candprice = 0
     for i, diff in enumerate(diffs):
+
         candprice+=diff.get(cand, 0)
+        #print(f"diff={diff.get(cand, 0)} for num={nums[i]}")
 
     if candprice > ans:
         ans = candprice
-        print(f"best {cand}")
+        print(f"best {cand} {candprice}")
 
 
 print(ans)

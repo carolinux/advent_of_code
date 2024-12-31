@@ -39,3 +39,4 @@ for num in nums:
     ans+=process(num, 2000)
 
 print(ans)
+# 17262627539
