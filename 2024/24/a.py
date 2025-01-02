@@ -70,3 +70,5 @@ skeys.sort(reverse=True)
 binstr = ''.join([str(end[k]) for k in skeys])
 print(int(f"0b{binstr}", 2))
 
+print(f"Num gates: {len(ops)}")
+
