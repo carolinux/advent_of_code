@@ -85,6 +85,10 @@ def get_codepaths(code):
 def get_sp(p1, p2, directional=True):
     if p1 == p2:
         return []
+    if p1 == 'v' and p2 == 'A':
+        return ['^','>']
+    if p2 == 'v' and p1 == 'A':
+        return ['<','v']
     #print(f"Finding path from {p1} to {p2}")
     if directional:
         dir = DIR
@@ -109,11 +113,11 @@ def get_sp(p1, p2, directional=True):
         if curr == end:
             #print(f"Found path {path}")
             return path
+
         # go down
         if curr[0] + 1 < len(dir):
             if dir[curr[0]+1][curr[1]] != X:
                 q.append(((curr[0]+1, curr[1]), path + [D]))
-
 
 
         # go right
@@ -132,6 +136,8 @@ def get_sp(p1, p2, directional=True):
         if curr[1] > 0:
             if dir[curr[0]][curr[1]-1] != X:
                 q.append(((curr[0], curr[1]-1), path + [L]))
+
+
 
 
 
@@ -171,6 +177,7 @@ for code in codes:
                 diplets[(f,s)]+=1
 
         #print(f"it=1, code={code} len of sequence={len(newseqs)}, cand={cand}")
+        first = newseqs[0]
         for i in range(2, 26):
             count = 0
             new_diplets = Counter()
@@ -196,16 +203,14 @@ for code in codes:
 
             diplets = new_diplets
 
-            if i == 2:
-                char = newseqs[0]
-            else:
-                char = 'v'
-            seq2 = copy(get_sp('A', char))
+            seq2 = copy(get_sp('A', first))
             seq2.append('A')
             count+=len(seq2)
             for j in range(1, len(seq2)):
                 diplet = (seq2[j-1], seq2[j])
                 new_diplets[diplet]+=1
+
+            first = seq2[0]
 
         minlen = min(minlen, count)
 
@@ -225,7 +230,13 @@ print(get_sp('^', 'v'))
 # 414564774114120 too high
 
 # 161427660668154 too low
+# 176357262630721
 
+# tried
 #404564774114120 too high
 #412430699844124
+#412430699844124
 #382430699844124
+#604821067076159
+#293023291027069
+#293625167005328
