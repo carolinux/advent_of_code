@@ -85,6 +85,10 @@ def get_codepaths(code):
 def get_sp(p1, p2, directional=True):
     if p1 == p2:
         return []
+    if p1 == 'v' and p2 == 'A':
+        return ['^','>']
+    if p2 == 'v' and p1 == 'A':
+        return ['<','v']
     #print(f"Finding path from {p1} to {p2}")
     if directional:
         dir = DIR
@@ -110,19 +114,23 @@ def get_sp(p1, p2, directional=True):
             #print(f"Found path {path}")
             return path
 
-        # go right
-        if curr[1] + 1 < len(dir[0]):
-            if dir[curr[0]][curr[1]+1] != X:
-                q.append(((curr[0], curr[1]+1), path + [R]))
         # go down
         if curr[0] + 1 < len(dir):
             if dir[curr[0]+1][curr[1]] != X:
                 q.append(((curr[0]+1, curr[1]), path + [D]))
 
+
+        # go right
+        if curr[1] + 1 < len(dir[0]):
+            if dir[curr[0]][curr[1]+1] != X:
+                q.append(((curr[0], curr[1]+1), path + [R]))
+
+
         # go up
         if curr[0] > 0:
             if dir[curr[0]-1][curr[1]] != X:
                 q.append(((curr[0]-1, curr[1]), path + [U]))
+
 
         # go left
         if curr[1] > 0:
@@ -142,12 +150,12 @@ codes = ['208A', '586A', '341A', '463A', '593A']
 for code in codes:
 
     cands = get_codepaths(code)
-    print(f"Code={code}, cands={cands}, len={len(cands[0])}")
+    #print(f"Code={code}, cands={cands}, len={len(cands[0])}")
     minlen = math.inf
 
     for cand in cands:
         seqs = cand
-        for i in range(1, 3): #(1, 26)
+        for i in range(1, 10): #(1, 26)
             #print(f"Code={code}, it={i}, len={len(seqs)}")
             newseqs = []
             pos = 'A'
@@ -157,7 +165,12 @@ for code in codes:
                 newseqs.extend(seq1)
                 newseqs.append('A')
                 pos = ch
-            print(f"Code={code}, it={i}, len={len(seqs)} len={len(newseqs)} ratio={len(newseqs)/len(seqs)}")
+            #print(f"Code={code}, it={i}, len={len(seqs)} len={len(newseqs)} ratio={len(newseqs)/len(seqs)}")
+            if i >1:
+                pass
+                #assert newseqs[0] == 'v'
+                #assert newseqs[1] == '<'
+                #print(newseqs[:2])
             seqs = newseqs
             #print(f"for code={code}, it={i} path={newseqs}, len={len(newseqs)}")
 
