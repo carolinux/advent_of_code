@@ -109,20 +109,24 @@ def get_sp(p1, p2, directional=True):
         if curr == end:
             #print(f"Found path {path}")
             return path
-
-        # go right
-        if curr[1] + 1 < len(dir[0]):
-            if dir[curr[0]][curr[1]+1] != X:
-                q.append(((curr[0], curr[1]+1), path + [R]))
         # go down
         if curr[0] + 1 < len(dir):
             if dir[curr[0]+1][curr[1]] != X:
                 q.append(((curr[0]+1, curr[1]), path + [D]))
 
+
+
+        # go right
+        if curr[1] + 1 < len(dir[0]):
+            if dir[curr[0]][curr[1]+1] != X:
+                q.append(((curr[0], curr[1]+1), path + [R]))
+
+
         # go up
         if curr[0] > 0:
             if dir[curr[0]-1][curr[1]] != X:
                 q.append(((curr[0]-1, curr[1]), path + [U]))
+
 
         # go left
         if curr[1] > 0:
@@ -131,7 +135,8 @@ def get_sp(p1, p2, directional=True):
 
 
 
-
+from collections import Counter
+from copy import copy
 # a robot moves on the number pad by >>>
 # another robot sends the >>>>
 # the first robot sends the >>> to the first robot
@@ -142,54 +147,65 @@ codes = ['208A', '586A', '341A', '463A', '593A']
 for code in codes:
 
     cands = get_codepaths(code)
-    print(f"Code={code}, cands={cands}, len={len(cands[0])}")
+    #print(f"Code={code}, cands={cands}, len={len(cands[0])}")
     minlen = math.inf
-
-
 
     for cand in cands:
         newseqs = []
         pos = 'A'
-        for ch in cand:
+        for jj, ch in enumerate(cand):
+
             #print(f"Finding path from {pos} to {ch} at {i}")
             seq1 = get_sp(pos, ch)
+            #print(f"Finding path from {pos} to {ch} at {i}={seq1}")
             newseqs.extend(seq1)
             newseqs.append('A')
+            #print(f"at {jj}, len(newseqs)={len(newseqs)}")
             pos = ch
-        triplets = {}
+
+        diplets = Counter()
         for i in range(len(newseqs)):
-            if i+2 < len(newseqs):
+            if i+1 < len(newseqs):
                 f = newseqs[i]
                 s = newseqs[i+1]
-                t = newseqs[i+1]
-                triplets[(f,s,t)]+=1
-            elif i+1 < len(newseqs):
-                f = newseqs[i]
-                s = newseqs[i+1]
-                t = None
-                triplets[(f,s,t)]+=1
+                diplets[(f,s)]+=1
 
-
-        triplets[(A, 'v', '>')]+=1
-        for i in range(2, 3): #(1, 26)
+        #print(f"it=1, code={code} len of sequence={len(newseqs)}, cand={cand}")
+        for i in range(2, 26):
             count = 0
+            new_diplets = Counter()
+            #print(f"{diplets} ofr {newseqs}")
 
-            for prev, ch, nxt in triplets:
-                cnt = triplets[(prev, ch, nxt)]
+            # the special diplet Av, doesnt prepend A
+
+            for prev, ch in diplets:
+                cnt = diplets[(prev, ch)]
                 #print(f"Finding path from {pos} to {ch} at {i}")
                 seq1 = get_sp(prev, ch)
-                if nxt is not None:
-                    seq2 = get_sp(ch, nxt)
-                    seq2.append('A')
-                else:
-                    seq2 = None
+                seq1 = seq1.copy()
                 seq1.append('A')
                 count+=len(seq1) * cnt
-                for j in range(1, seq1):
-                    diplet = (seq1[i-1], seq1[i])
-            print(f"Code={code}, it={i}, len={len(seqs)} len={len(newseqs)} ratio={len(newseqs)/len(seqs)}")
+                for j in range(1, len(seq1)):
+                    diplet = (seq1[j-1], seq1[j])
+                    new_diplets[diplet]+=cnt
+
+                new_diplets[(A, seq1[0])]+=cnt
+
+            #new_diplets[(A, 'v')]+=1
+            #print(f"Code={code}, it={i}, len={len(seqs)} len={len(newseqs)} ratio={len(newseqs)/len(seqs)}")
 
             diplets = new_diplets
+
+            if i == 2:
+                char = newseqs[0]
+            else:
+                char = 'v'
+            seq2 = copy(get_sp('A', char))
+            seq2.append('A')
+            count+=len(seq2)
+            for j in range(1, len(seq2)):
+                diplet = (seq2[j-1], seq2[j])
+                new_diplets[diplet]+=1
 
         minlen = min(minlen, count)
 
@@ -197,3 +213,19 @@ for code in codes:
     print(f"{minlen} x {int(code[:3])}")
 
 print(ans)
+
+print(get_sp('A', '<'))
+print(get_sp('<', 'A'))
+print(get_sp('A', '^'))
+print(get_sp('A', '>'))
+print(get_sp('A', 'v'))
+
+print(get_sp('^', 'v'))
+
+# 414564774114120 too high
+
+# 161427660668154 too low
+
+#404564774114120 too high
+#412430699844124
+#382430699844124
