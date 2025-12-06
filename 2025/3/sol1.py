@@ -2,7 +2,7 @@ import sys
 from collections import defaultdict
 ans = 0
 
-with open("small.txt", "r") as f:
+with open("input.txt", "r") as f:
     for line in f.readlines():
         line = line.strip()
         nums = list(int(x) for x in line)
