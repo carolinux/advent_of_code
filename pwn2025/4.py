@@ -18,7 +18,32 @@ from: https://en.wikipedia.org/wiki/RSA_cryptosystem
 
 Alice can recover m from c by using her private key exponent d by computing
 
-c d ≡ ( m e ) d ≡ m ( mod n ) . {\displaystyle c^{d}\equiv (m^{e})^{d}\equiv m{\pmod {n}}.}
+c^ d ≡ ( m ^e ) d ≡ m ( mod n ) . {\displaystyle c^{d}\equiv (m^{e})^{d}\equiv m{\pmod {n}}.}
 
 
 """
+import math
+
+n = 100160063
+
+e = 65537
+
+c = 43689330
+
+def divs(num):
+    sq = int(math.sqrt(n))
+    for i in range(2, sq+1):
+        if num%i == 0:
+            p = i
+            q = num // p
+            return p, q
+
+
+p, q = divs(n)
+print(p, q)
+modulo = (p-1)*(q-1)
+d = pow(e, -1, modulo)
+cleartext = pow(c, d, n)
+print(cleartext)
+
+
