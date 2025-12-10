@@ -64,7 +64,7 @@ def dpsolve(start, target, togs):
 
 maxx = 0
 maxb = 0
-with open("out.txt", "w") as w:
+with open("out2.txt", "w") as w:
     with open("small.txt", "r") as f:
         for i, line in enumerate(f.readlines()):
             #if i !=50:
@@ -135,4 +135,3 @@ with open("out.txt", "w") as w:
 print(ans)
 #print(maxx)
 #print(maxb)
-# 17986 -- too low
