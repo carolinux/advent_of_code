@@ -23,10 +23,10 @@ def paths(node):
     ans = 0
 
     for ch in g[node]:
-        if ch not in vis:
-            vis.add(ch)
-            ans+=paths(ch)
-            vis.remove(ch)
+        #if ch not in vis:
+        #vis.add(ch)
+        ans+=paths(ch)
+        #vis.remove(ch)
 
 
     return ans
