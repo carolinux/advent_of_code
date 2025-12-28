@@ -21,6 +21,21 @@ struct BitsetCompare {
     }
 };
 
+struct BitsetHash {
+    size_t operator()(const bitset<N>& b) const {
+        size_t hash = 0;
+        // Extract bitset in 64-bit chunks and XOR them
+        for (int i = 0; i < N; i += 64) {
+            size_t chunk = 0;
+            for (int j = 0; j < 64 && i + j < N; j++) {
+                if (b[i + j]) chunk |= (1ULL << j);
+            }
+            hash ^= chunk;
+        }
+        return hash;
+    }
+};
+
 struct Machine {
     vector<vector<int>> buttons;
     vector<int> targetJolts;
@@ -226,7 +241,7 @@ tuple<bitset<N>, bool, bool> tryy(Machine &m, const bitset<N> &b, const vector<i
     return {new_b, true, true};  // valid, continue
 }
 
-int recur(Machine &m, bitset<N> &b, map<bitset<N>, int, BitsetCompare> & ma, const vector<int>& lastOpForButton) {
+int recur(Machine &m, bitset<N> &b, unordered_map<bitset<N>, int, BitsetHash> & ma, const vector<int>& lastOpForButton) {
 
     // if we have seen this state before
     if (ma.find(b) != ma.end()) {
@@ -265,7 +280,7 @@ int recur(Machine &m, bitset<N> &b, map<bitset<N>, int, BitsetCompare> & ma, con
 
 int solve(Machine &m) {
 
-    map<bitset<N>, int, BitsetCompare> seen;
+    unordered_map<bitset<N>, int, BitsetHash> seen;
     vector<int> lastOpForButton = getLastOpForButton(m);
 
     bitset<N> b;
