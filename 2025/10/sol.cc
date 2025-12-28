@@ -27,8 +27,8 @@ struct Machine {
     int maxIter;
 };
 
-vector<int> getSortedButtons(Machine &m) {
-    vector<int> res;
+vector<vector<int>> getSortedButtons(Machine &m) {
+    vector<int> res1;
     map<int, int> freq;
     for (auto &button: m.buttons) {
         for (int val : button) {
@@ -46,9 +46,40 @@ vector<int> getSortedButtons(Machine &m) {
     });
 
     for (auto &p : freqVec) {
-        res.push_back(p.first);
+        res1.push_back(p.first);
     }
 
+    // print the frequency sorted buttons
+    cout << "Frequency sorted buttons: ";
+    for (int btn : res1) {
+        cout << btn << " (freq: " << freq[btn] << "), ";
+    }
+
+    // Create priority map: button index -> priority (lower is higher priority)
+    map<int, int> priority;
+    for (int i = 0; i < res1.size(); i++) {
+        priority[res1[i]] = i;
+    }
+
+    // Sort operations by minimum priority of buttons they affect
+    vector<vector<int>> res = m.buttons;
+    sort(res.begin(), res.end(), [&](const vector<int> &a, const vector<int> &b) {
+        int minPriorityA = INT_MAX;
+        for (int btn : a) {
+            if (priority.count(btn)) {
+                minPriorityA = min(minPriorityA, priority[btn]);
+            }
+        }
+
+        int minPriorityB = INT_MAX;
+        for (int btn : b) {
+            if (priority.count(btn)) {
+                minPriorityB = min(minPriorityB, priority[btn]);
+            }
+        }
+
+        return minPriorityA < minPriorityB;
+    });
 
     return res;
 }
@@ -265,10 +296,22 @@ int main() {
         for (int x : machines[i].targetJolts) cout << x << " ";
         cout << " \nLeast Frequent Buttons: ";*/
 
-        vector<int> freqButtons = getSortedButtons(machines[i]);
-        for (int x : freqButtons) cout << x << " ";
+        vector<vector<int>> freqButtons = getSortedButtons(machines[i]);
+        machines[i].buttons = freqButtons;
 
-        int count = solve(machines[i], freqButtons);
+        cout << "Machine " << i+1 << " buttons:\n";
+        for (auto& btn : machines[i].buttons) {
+            cout << "  [";
+            for (int j = 0; j < btn.size(); j++) {
+                cout << btn[j];
+                if (j < btn.size() - 1) cout << ", ";
+            }
+            cout << "]\n";
+        }
+        cout << flush;
+
+        vector<int> dummy;
+        int count = solve(machines[i], dummy);
         ans+= count;
         cout<<"Count: "<<count << "\n" << flush;
 
