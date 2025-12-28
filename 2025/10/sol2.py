@@ -91,7 +91,7 @@ with open("out2.txt", "w") as w:
 
             #print(f"{len(target)}: {cnt}")
             cnts = [(v, k) for k,v in cnt.items()]
-            cnts.sort(key=lambda x: (x[0], target[x[1]-1]))
+            cnts.sort(key=lambda x: (x[0], target[x[1]-1])) # get smaller number of occurences first, break ties by favoring smaller overall count
             maxx = max(max(target), maxx)
 
             bytes_needed = len(target) * int(math.ceil(math.log2(max(target))))
@@ -135,3 +135,4 @@ with open("out2.txt", "w") as w:
 print(ans)
 #print(maxx)
 #print(maxb)
+# solution: 18105
