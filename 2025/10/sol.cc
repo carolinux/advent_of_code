@@ -1,7 +1,9 @@
 #include <bits/stdc++.h>
 #include <bitset>
 #include <map>
+#include <chrono>
 using namespace std;
+using namespace chrono;
 
 
 // up to 10 slots of {0, 255} values so 10 x 8 bit = 80
@@ -12,27 +14,14 @@ using namespace std;
 
 const int N = 84;
 
-struct BitsetCompare {
-    bool operator()(const bitset<N>& a, const bitset<N>& b) const {
-        for (int i = N-1; i >= 0; i--) {
-            if (a[i] != b[i]) return a[i] < b[i];
-        }
-        return false;
-    }
-};
+// State: pair<uint64_t, uint32_t>
+// - first (64 bits): values[0-7], 8 bits each
+// - second (32 bits): values[8-9] (16 bits) + buttonIdx (4 bits)
+using State = pair<uint64_t, uint32_t>;
 
-struct BitsetHash {
-    size_t operator()(const bitset<N>& b) const {
-        size_t hash = 0;
-        // Extract bitset in 64-bit chunks and XOR them
-        for (int i = 0; i < N; i += 64) {
-            size_t chunk = 0;
-            for (int j = 0; j < 64 && i + j < N; j++) {
-                if (b[i + j]) chunk |= (1ULL << j);
-            }
-            hash ^= chunk;
-        }
-        return hash;
+struct StateHash {
+    size_t operator()(const State& s) const {
+        return s.first ^ ((size_t)s.second << 32);
     }
 };
 
@@ -107,27 +96,28 @@ vector<vector<int>> getSortedButtons(Machine &m) {
   return temp.to_ullong() & mask;
 }*/
 
-int getCount(const bitset<N>& b, int i) {
-    int val = 0;
-    int start = i * 8;
-    for (int j = 0; j < 8; j++) {
-        val |= (b[start + j] << j);
+int getCount(const State& s, int i) {
+    if (i < 8) {
+        // Extract from first 64 bits
+        return (s.first >> (i * 8)) & 0xFF;
+    } else if (i == 8) {
+        // Extract from second, bits 0-7
+        return s.second & 0xFF;
+    } else if (i == 9) {
+        // Extract from second, bits 8-15
+        return (s.second >> 8) & 0xFF;
     }
-    return val;
+    return 0;
 }
 
-int getButtonIndex(const bitset<N>& b) {
-    int val = 0;
-    for (int j = 0; j < 4; j++) {
-        val |= (b[80 + j] << j);
-    }
-    return val;
+int getButtonIndex(const State& s) {
+    // Extract from second, bits 16-19
+    return (s.second >> 16) & 0xF;
 }
 
-bool done(const bitset<N> &b, Machine &m) {
-
+bool done(const State& s, Machine &m) {
     for (int i=0;i<m.targetJolts.size();i++) {
-        auto cnt1 = getCount(b, i);
+        auto cnt1 = getCount(s, i);
         if (cnt1 != m.targetJolts[i]) {
             return false;
         }
@@ -136,34 +126,21 @@ bool done(const bitset<N> &b, Machine &m) {
 }
 
 
-bitset<N> getStateKey(int buttonIdx, vector<int> &values) {
+State getStateKey(int buttonIdx, vector<int> &values) {
+    uint64_t part1 = 0;
+    uint32_t part2 = 0;
 
-    bitset<N> b;
-    long unsigned int part1 = 0;
-    unsigned int part2 = 0;
-
-    unsigned int elem9 = 0;
-    unsigned int elem10 = 0;
-
-    for (int i =0;i< values.size();i++) {
-        if (i == 8) {
-            elem9 = values[i];
-            continue;
-        }
-        if (i == 9) {
-            elem10 = values[i];
-            continue;
-        }
-        part1 |= ((unsigned long long)values[i] << (i * 8));
+    // Pack first 8 values into part1 (64 bits)
+    for (int i = 0; i < 8 && i < values.size(); i++) {
+        part1 |= ((uint64_t)values[i] << (i * 8));
     }
 
-    part2 = (buttonIdx<<16) | (elem10 << 8) | elem9;
+    // Pack values[8], values[9], and buttonIdx into part2 (32 bits)
+    uint32_t elem8 = (values.size() > 8) ? values[8] : 0;
+    uint32_t elem9 = (values.size() > 9) ? values[9] : 0;
+    part2 = (buttonIdx << 16) | (elem9 << 8) | elem8;
 
-    bitset<N> p1(part1);
-    bitset<N> p2(part2);
-
-    b = (p2 << 64) | p1;
-    return b;
+    return {part1, part2};
 }
 
 vector<int> parseVector(const string &s, char open, char close) {
@@ -216,42 +193,42 @@ vector<int> getLastOpForButton(Machine &m) {
     return lastOp;
 }
 
-tuple<bitset<N>, bool, bool> tryy(Machine &m, const bitset<N> &b, const vector<int> &button, int times, int currentOpIdx, const vector<int>& lastOpForButton) {
+tuple<State, bool, bool> tryy(Machine &m, const State &s, const vector<int> &button, int times, int currentOpIdx, const vector<int>& lastOpForButton) {
     vector<int> currCounts;
     for (int i=0;i<m.targetJolts.size();i++) {
-        currCounts.push_back(getCount(b, i));
+        currCounts.push_back(getCount(s, i));
     }
 
     for (int j=0;j<button.size();j++) {
         int i = button[j];
         currCounts[i] += times;
         if (currCounts[i] > m.targetJolts[i]) {
-            return {bitset<N>(), false, false};  // exceeded, break
+            return {State(), false, false};  // exceeded, break
         }
     }
 
     // Check if this is last op for any button and we haven't reached target
     for (int i = 0; i < m.targetJolts.size(); i++) {
         if (currCounts[i] < m.targetJolts[i] && lastOpForButton[i] == currentOpIdx) {
-            return {bitset<N>(), false, true};  // too low, continue
+            return {State(), false, true};  // too low, continue
         }
     }
 
-    bitset<N> new_b = getStateKey(getButtonIndex(b)+1, currCounts);
-    return {new_b, true, true};  // valid, continue
+    State new_s = getStateKey(getButtonIndex(s)+1, currCounts);
+    return {new_s, true, true};  // valid, continue
 }
 
-int recur(Machine &m, bitset<N> &b, unordered_map<bitset<N>, int, BitsetHash> & ma, const vector<int>& lastOpForButton) {
+int recur(Machine &m, State &s, unordered_map<State, int, StateHash> & ma, const vector<int>& lastOpForButton) {
 
     // if we have seen this state before
-    if (ma.find(b) != ma.end()) {
-        return ma[b];
+    if (ma.find(s) != ma.end()) {
+        return ma[s];
     }
 
-    if (done(b, m)) {
+    if (done(s, m)) {
         return 0;
     }
-    int buttonIdx = getButtonIndex(b);
+    int buttonIdx = getButtonIndex(s);
     if (buttonIdx >= m.buttons.size()) {
         return 1e9;
     }
@@ -259,19 +236,19 @@ int recur(Machine &m, bitset<N> &b, unordered_map<bitset<N>, int, BitsetHash> & 
 
     for (int i=0;i<=m.maxIter;i++) {
         // try to apply buttonOrder[buttonIdx],  i times
-        auto [new_b, valid, cont] = tryy(m, b, m.buttons[buttonIdx], i, buttonIdx, lastOpForButton);
+        auto [new_s, valid, cont] = tryy(m, s, m.buttons[buttonIdx], i, buttonIdx, lastOpForButton);
         if (!cont) {
             break;
         }
         if (!valid) {
             continue;
         }
-        int cand = recur(m, new_b, ma, lastOpForButton) + i;
+        int cand = recur(m, new_s, ma, lastOpForButton) + i;
         mincand = min(mincand, cand);
 
     }
 
-    ma[b] = mincand;
+    ma[s] = mincand;
     return mincand;
 
 
@@ -280,11 +257,11 @@ int recur(Machine &m, bitset<N> &b, unordered_map<bitset<N>, int, BitsetHash> & 
 
 int solve(Machine &m) {
 
-    unordered_map<bitset<N>, int, BitsetHash> seen;
+    unordered_map<State, int, StateHash> seen;
     vector<int> lastOpForButton = getLastOpForButton(m);
 
-    bitset<N> b;
-    return recur(m, b, seen, lastOpForButton);
+    State s = {0, 0};  // Initial state: all zeros
+    return recur(m, s, seen, lastOpForButton);
 }
 
 
@@ -344,9 +321,13 @@ int main() {
         }
         cout << flush;
 
+        auto start = high_resolution_clock::now();
         int count = solve(machines[i]);
+        auto end = high_resolution_clock::now();
+        auto duration = duration_cast<milliseconds>(end - start).count();
+
         ans+= count;
-        cout<<"Count for case "<<i+1<<" = "<<count << "\n" << flush;
+        cout<<"Count for case "<<i+1<<" = "<<count << " (took " << duration << " ms)\n" << flush;
 
 
 
