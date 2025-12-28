@@ -226,7 +226,7 @@ tuple<bitset<N>, bool, bool> tryy(Machine &m, const bitset<N> &b, const vector<i
     return {new_b, true, true};  // valid, continue
 }
 
-int recur(Machine &m, bitset<N> &b, vector<int> &buttonOrder, map<bitset<N>, int, BitsetCompare> & ma, const vector<int>& lastOpForButton) {
+int recur(Machine &m, bitset<N> &b, map<bitset<N>, int, BitsetCompare> & ma, const vector<int>& lastOpForButton) {
 
     // if we have seen this state before
     if (ma.find(b) != ma.end()) {
@@ -251,7 +251,7 @@ int recur(Machine &m, bitset<N> &b, vector<int> &buttonOrder, map<bitset<N>, int
         if (!valid) {
             continue;
         }
-        int cand = recur(m, new_b, buttonOrder, ma, lastOpForButton) + i;
+        int cand = recur(m, new_b, ma, lastOpForButton) + i;
         mincand = min(mincand, cand);
 
     }
@@ -263,13 +263,13 @@ int recur(Machine &m, bitset<N> &b, vector<int> &buttonOrder, map<bitset<N>, int
 }
 
 
-int solve(Machine &m, vector<int> &freqButtons) {
+int solve(Machine &m) {
 
     map<bitset<N>, int, BitsetCompare> seen;
     vector<int> lastOpForButton = getLastOpForButton(m);
 
     bitset<N> b;
-    return recur(m, b, freqButtons, seen, lastOpForButton);
+    return recur(m, b, seen, lastOpForButton);
 }
 
 
@@ -329,8 +329,7 @@ int main() {
         }
         cout << flush;
 
-        vector<int> dummy;
-        int count = solve(machines[i], dummy);
+        int count = solve(machines[i]);
         ans+= count;
         cout<<"Count for case "<<i+1<<" = "<<count << "\n" << flush;
 
