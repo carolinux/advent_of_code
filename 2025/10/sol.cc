@@ -189,9 +189,19 @@ vector<int> parseVector(const string &s, char open, char close) {
     return recur(0, start)
 */
 
+vector<int> getLastOpForButton(Machine &m) {
+    vector<int> lastOp(m.targetJolts.size(), -1);
+    for (int opIdx = m.buttons.size() - 1; opIdx >= 0; opIdx--) {
+        for (int btn : m.buttons[opIdx]) {
+            if (lastOp[btn] == -1) {
+                lastOp[btn] = opIdx;
+            }
+        }
+    }
+    return lastOp;
+}
 
-
-pair<bitset<N>, bool> tryy(Machine &m, const bitset<N> &b, const vector<int> &button, int times) {
+tuple<bitset<N>, bool, bool> tryy(Machine &m, const bitset<N> &b, const vector<int> &button, int times, int currentOpIdx, const vector<int>& lastOpForButton) {
     vector<int> currCounts;
     for (int i=0;i<m.targetJolts.size();i++) {
         currCounts.push_back(getCount(b, i));
@@ -201,17 +211,22 @@ pair<bitset<N>, bool> tryy(Machine &m, const bitset<N> &b, const vector<int> &bu
         int i = button[j];
         currCounts[i] += times;
         if (currCounts[i] > m.targetJolts[i]) {
-            return {bitset<N>(), false};
+            return {bitset<N>(), false, false};  // exceeded, break
         }
     }
-    // todo: extra optimization with last seen
 
+    // Check if this is last op for any button and we haven't reached target
+    for (int i = 0; i < m.targetJolts.size(); i++) {
+        if (currCounts[i] < m.targetJolts[i] && lastOpForButton[i] == currentOpIdx) {
+            return {bitset<N>(), false, true};  // too low, continue
+        }
+    }
 
     bitset<N> new_b = getStateKey(getButtonIndex(b)+1, currCounts);
-    return {new_b, true};
+    return {new_b, true, true};  // valid, continue
 }
 
-int recur(Machine &m, bitset<N> &b, vector<int> &buttonOrder, map<bitset<N>, int, BitsetCompare> & ma) {
+int recur(Machine &m, bitset<N> &b, vector<int> &buttonOrder, map<bitset<N>, int, BitsetCompare> & ma, const vector<int>& lastOpForButton) {
 
     // if we have seen this state before
     if (ma.find(b) != ma.end()) {
@@ -229,11 +244,14 @@ int recur(Machine &m, bitset<N> &b, vector<int> &buttonOrder, map<bitset<N>, int
 
     for (int i=0;i<=m.maxIter;i++) {
         // try to apply buttonOrder[buttonIdx],  i times
-        auto [new_b, cont] = tryy(m, b, m.buttons[buttonIdx], i);
+        auto [new_b, valid, cont] = tryy(m, b, m.buttons[buttonIdx], i, buttonIdx, lastOpForButton);
         if (!cont) {
             break;
         }
-        int cand = recur(m, new_b, buttonOrder, ma) + i;
+        if (!valid) {
+            continue;
+        }
+        int cand = recur(m, new_b, buttonOrder, ma, lastOpForButton) + i;
         mincand = min(mincand, cand);
 
     }
@@ -248,9 +266,10 @@ int recur(Machine &m, bitset<N> &b, vector<int> &buttonOrder, map<bitset<N>, int
 int solve(Machine &m, vector<int> &freqButtons) {
 
     map<bitset<N>, int, BitsetCompare> seen;
+    vector<int> lastOpForButton = getLastOpForButton(m);
 
     bitset<N> b;
-    return recur(m, b, freqButtons, seen);
+    return recur(m, b, freqButtons, seen, lastOpForButton);
 }
 
 
@@ -313,7 +332,7 @@ int main() {
         vector<int> dummy;
         int count = solve(machines[i], dummy);
         ans+= count;
-        cout<<"Count: "<<count << "\n" << flush;
+        cout<<"Count for case "<<i+1<<" = "<<count << "\n" << flush;
 
 
 
