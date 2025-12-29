@@ -156,9 +156,9 @@ vector<int> getLastOpForButton(Machine &m) {
 }
 
 tuple<State, bool, bool> tryy(Machine &m, const State &s, const vector<int> &button, int times, int currentOpIdx, const vector<int>& lastOpForButton) {
-    vector<int> currCounts;
+    int currCounts[10] = {};  // Stack-allocated, zero-initialized
     for (int i=0;i<m.targetJolts.size();i++) {
-        currCounts.push_back(s.values[i]);  // Direct access!
+        currCounts[i] = s.values[i];  // Direct assignment
     }
 
     for (int j=0;j<button.size();j++) {
@@ -176,7 +176,12 @@ tuple<State, bool, bool> tryy(Machine &m, const State &s, const vector<int> &but
         }
     }
 
-    State new_s = getStateKey(s.buttonIdx + 1, currCounts);  // Direct access!
+    // Create state directly from array (no vector allocation!)
+    State new_s = {};
+    new_s.buttonIdx = s.buttonIdx + 1;
+    for (int i = 0; i < m.targetJolts.size(); i++) {
+        new_s.values[i] = currCounts[i];
+    }
     return {new_s, true, true};  // valid, continue
 }
 
