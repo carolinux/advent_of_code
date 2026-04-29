@@ -1,41 +1,66 @@
+import sys
 fn = "input.txt"
-
-
-def arr_to_bin(a):
-    num = 0
-    for i in range(len(a)):
-        num<<=1
-        num+=a[i]
-    return num
 
 
 
 ans = 0
-cnts1 = [0] * 12
+mats = []
 cnt = 0
+# parsety parse
 with open(fn, 'r') as f:
     for line in f.readlines():
-        num = line.strip()
-        print(num)
-        for i in range(len(num)):
-            if num[i] == "1":
-                cnts1[i]+=1
+        if cnt == 0:
+            nums = list(line.strip().split(","))
+            #print(nums)
+            xnums = [int(x) for x in nums]
+            cnt+=1
+            continue
+        if line.strip() == "":
+            cnt+=1
+            continue
+        if (cnt +4 ) % 6 == 0:
+            mat = []
+        nums = list(line.strip().split(" "))
+        nums =[int(x) for x in nums if x !=""]
+        assert len(nums) == 5
+        mat.append(nums)
+        if (cnt+4) % 6 == 4:
+            mats.append(mat)
+            assert len(mat) == 5, f"{len(mat)}\n{mat}"
         cnt+=1
 
+def process(mat, targ):
+    s = 0
+    for i in range(5):
+        for j in range(5):
+            if mat[i][j] == targ:
+                mat[i][j] = -1
+            elif mat[i][j] !=-1:
+                s+= mat[i][j]
 
-gamma = [0] * 12
-epsilon = [0] * 12
+    for i in range(5):
+        if all(mat[i][x] == -1 for x in range(5)):
+            return True, s
+        if all(mat[x][i] == -1 for x in range(5)):
+            return True, s
 
-for i in range(12):
-    zeroes = cnt - cnts1[i]
-    ones = cnts1[i]
-    gamma[i] = 1 if ones>zeroes else 0
-    epsilon[i] = 1 - gamma[i]
+    #print(f"{mat[0]}, targ={targ}")
+
+    return False, s
 
 
-ans = arr_to_bin(gamma) * arr_to_bin(epsilon)
-print(ans)
+wins = set()
 
+for num in xnums:
+    for mi, mat in enumerate(mats):
+        if mi in wins:
+            continue
+        won, s = process(mat, num)
+        if won:
+            # first output is answer to part1, last output is answer to part2
+            wins.add(mi)
+            print(s*num)
+            #sys.exit(0)
 
 
 
