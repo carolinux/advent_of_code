@@ -20,16 +20,13 @@ struct State {
         return buttonIdx == o.buttonIdx &&
                memcmp(values, o.values, 10) == 0;
     }
-};
 
-struct StateHash {
-    size_t operator()(const State& s) const {
-        // Better hash than simple XOR - like Python/Java
-        size_t h = s.buttonIdx;
-        for (int i = 0; i < 10; i++) {
-            h = h * 31 + s.values[i];
-        }
-        return h;
+    // Abseil's standard way to define hash - uses optimized hashing
+    template <typename H>
+    friend H AbslHashValue(H h, const State& s) {
+        return H::combine(std::move(h),
+                         s.buttonIdx,
+                         std::string_view(reinterpret_cast<const char*>(s.values), 10));
     }
 };
 
@@ -186,7 +183,7 @@ tuple<State, bool, bool> tryy(Machine &m, const State &s, const vector<int> &but
     return {new_s, true, true};  // valid, continue
 }
 
-int recur(Machine &m, State &s, absl::flat_hash_map<State, int, StateHash> & ma, const vector<int>& lastOpForButton) {
+int recur(Machine &m, State &s, absl::flat_hash_map<State, int> & ma, const vector<int>& lastOpForButton) {
 
     // if we have seen this state before
     if (ma.find(s) != ma.end()) {
@@ -225,7 +222,7 @@ int recur(Machine &m, State &s, absl::flat_hash_map<State, int, StateHash> & ma,
 
 int solve(Machine &m) {
 
-    absl::flat_hash_map<State, int, StateHash> seen;
+    absl::flat_hash_map<State, int> seen;  // Uses AbslHashValue for hashing
     // NOTE: Don't reserve! Causes OOM due to rehashing memory spikes.
     // The bit-packed version worked without reserve, so we don't use it here either.
 
@@ -297,4 +294,4 @@ int main() {
     cout << ans << "\n";
     return 0;
 }
-ga
+freq
