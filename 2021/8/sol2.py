@@ -92,7 +92,7 @@ def verificat(final_mapping, outs):
 
 
 
-
+# overkill, could have done 7! exhaustive search of the mappings
 def solve(ins, outs):
     ins.sort(key=lambda x: len(x))
 
