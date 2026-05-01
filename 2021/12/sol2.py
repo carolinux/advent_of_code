@@ -18,22 +18,26 @@ with open(fn, "r") as f:
         g[b].append(a)
 
 # path is not necessary, but was good to debug with
-def dfs(node, vis, path):
+def dfs(node, vis, path, used_twice):
     #print(vis)
-
+    #print(path)
     if node == "end":
         #print(path)
         return 1
 
     res = 0
     for ch in g[node]:
+        just_used_twice = False
         if ch in vis:
-            continue
+            if used_twice or ch =="start":
+                continue
+            just_used_twice = True
         if ch.lower() == ch:
             vis.add(ch)
         path.append(ch)
-        res+=dfs(ch, vis, path)
-        vis.discard(ch) # no error if not exists
+        res+=dfs(ch, vis, path, just_used_twice or used_twice)
+        if not just_used_twice:
+            vis.discard(ch) # no error if not exists
         path.pop()
     return res
 
@@ -42,6 +46,6 @@ def dfs(node, vis, path):
 vis = set()
 vis.add('start')
 path = ["start"]
-ans = dfs("start", vis, path)
+ans = dfs("start", vis, path, False)
 
 print(ans)
