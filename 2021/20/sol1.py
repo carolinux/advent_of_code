@@ -2,7 +2,7 @@ import sys
 from collections import Counter, deque, defaultdict
 import copy
 fn = "input.txt"
-fn = "small.txt"
+#fn = "small.txt"
 
 
 def read_mat(fn, func=str):
@@ -36,17 +36,28 @@ def print_mat(mat):
     for row in mat:
         print("".join([str(x) for x in row]))
 
-def get_neighs(mat, i, j):
+def get_neighs(mat, i, j, iter):
     res = []
     r = len(mat)
     c = len(mat[0])
     for di,dj in [(-1,-1), (-1, 0), (-1, 1), (0,-1),(0,0),(0,1),(1,-1),(1,0),(1,1)]:
         ni=i+di
         nj=j+dj
+        if (ni == 0 or nj == 0 or ni == len(mat)-1 or nj == len(mat[0]) -1) and iter == 1:
+            assert iter == 1
+            res.append("#")
+            continue
         if ni>=0 and ni<r and nj>=0 and nj<c:
             res.append(mat[ni][nj])
         else:
-            raise Exception(f"should not have gone oob -> {ni,nj} {len(mat)}x {len(mat[0])}")
+            if fn == "small.txt":
+                res.append('.')
+                continue
+            if iter == 0:
+                res.append('.')
+            else:
+                res.append('#')
+            #raise Exception(f"should not have gone oob -> {ni,nj} {len(mat)}x {len(mat[0])}")
     return res
 
 def parse_vals(vals):
@@ -59,8 +70,8 @@ def parse_vals(vals):
     return num
 
 
-def compress(mat, i, j):
-    vals = get_neighs(mat, i, j)
+def compress(mat, i, j, iter):
+    vals = get_neighs(mat, i, j, iter)
     #print(f"{vals} for {i},{j}")
     num = parse_vals(vals)
     new = key[num]
@@ -68,11 +79,11 @@ def compress(mat, i, j):
     return new
 
 
-def process(mat, r0, c0, rows, cols):
+def process(mat, r0, c0, rows, cols, iter):
     mat2 = copy.deepcopy(mat)
     for i in range(r0, rows):
         for j in range(c0, cols):
-            new_val = compress(mat, i, j)
+            new_val = compress(mat, i, j, iter)
             mat2[i][j] = new_val
 
     return mat2
@@ -82,33 +93,44 @@ ans = 0
 key, mat = read_mat(fn)
 r = len(mat)
 c = len(mat[0])
+origr = r
 print(key)
 
 #print_mat(mat)
-outerat = 3
+outerat = 2
 iterat = 2
 mat = expand(mat, outerat)
 print_mat(mat)
 
+r0 = outerat - 1
+c0 = outerat - 1
+rx = r0+r+2
+cx = c0+c+2
 
 for i in range(2):
     ans = 0
     print(f"start row {outerat-i-1}")
-    r0 = outerat-i-1
-    c0 = outerat-i-1
-    rx = r0+r+i+outerat
-    cx = c0+c+i+outerat
-    #print(f"{r0} to {rx}, {mat[0]}, {len(mat[0])}")
+    print(f"{r0} to {rx}, {mat[1]}, {len(mat[0])}")
+    print(f"size = {rx-r0}, origsize={origr}, step={i+1}")
 
-    mat = process(mat, r0,c0, rx, cx)
+    mat = process(mat, r0,c0, rx, cx, i)
 
     for ii in range(len(mat)):
         for jj in range(len(mat[0])):
+            if ii<r0 or ii > rx or jj<c0 or jj>cx:
+                if i == 0 and fn !="small.txt":
+                    ans+=1
+                    mat[ii][jj] = "#"
+                continue
             if mat[ii][jj] == "#":
                 ans+=1
     #print("-------------------")
     #print(f"after iterat {i+1}: lit = {ans}")
-    #print_mat(mat)
+    print_mat(mat[:5])
+    r0-=1
+    c0-=1
+    rx+=1
+    cx+=1
 
 
 print(ans)
