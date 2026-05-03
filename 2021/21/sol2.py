@@ -2,60 +2,52 @@
 p1 = 10
 p2 = 2
 
+
 #p1 = 4
 #p2 = 8
 
 
-sc1 = 0
-sc2 = 0
-i = 0
+import functools as ft
+from collections import Counter
+
+SCORES = Counter()
+
+for i in range(1,4):
+    for j in range(1,4):
+        for k in range(1, 4):
+            s = i+j+k
+            SCORES[s]+=1
 
 
-def dicey():
-    dice = 1
-    while True:
-        print(f"used dice={dice}")
-        yield dice
+@ft.lru_cache(maxsize=None)
+def recur(scs, poss, t):
 
-        dice+=1
-        if dice>100:
-            dice=1
+    wins = [0, 0]
+    new_turn = 1-t
 
-dice = dicey()
+    for posincr, count in SCORES.items():
 
-while True:
+        new_pos = poss[t] + posincr
+        if new_pos>10:
+            new_pos%=10
+        incr = new_pos
 
+        if scs[t] + incr>=21:
+            wins[t] +=count
+            continue
+        if t == 0:
+            new_scores = (scs[0]+incr, scs[1])
+            new_poss = (new_pos, poss[1])
+        else:
+            new_scores = (scs[0], scs[1]+incr)
+            new_poss = (poss[0], new_pos)
 
-    throw = sum([next(dice) for _ in range(3)])
-    if i%2 == 0:
-        p1+=throw
-        if p1 > 10:
-            p1 = (p1 % 10)
-            if p1  == 0:
-                p1 = 10
-        sc1+=p1
-        if sc1 >= 1000:
-            print((i+1)*3*sc2)
-            break
+        wins2 = recur(new_scores, new_poss, new_turn)
+        wins[0]+=wins2[0]*count
+        wins[1]+=wins2[1]*count
 
-    else:
-        p2+=throw
-        if p2>10:
-            p2 = (p2 % 10)
-            if p2 == 0:
-                p2 = 10
-        sc2+=p2
-        if sc2 >= 1000:
-            print((i+1)*3*sc1)
-            break
+    return wins
 
-
-    print(f"p1: {p1} sc1={sc1} | p2: p2={p2} {sc2}")
-
-
-    i+=1
-    #if i >10:
-    #    break
-
-print(f"p1: {p1} sc1={sc1} | p2: p2={p2} {sc2}")
-print(f"after {(i+1)*3} rools")
+wins = recur((0, 0), (p1,p2), 0)
+print(wins)
+print(max(wins))
